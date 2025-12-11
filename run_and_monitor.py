@@ -16,11 +16,10 @@ async def main():
         config = json.load(f)
 
     project_id = config.get("project_id")
-    script_path = config.get("script_path")
-    timeout = config.get("timeout")
+    jobs_data = config.get("jobs")
 
-    if not all([project_id, script_path, timeout]):
-        print("Error: config file must contain 'project_id', 'script_path', and 'timeout'.")
+    if not all([project_id, jobs_data]):
+        print("Error: config file must contain 'project_id' and a list of 'jobs'.")
         sys.exit(1)
 
     vms = login_and_discover_vms(project_id)
@@ -30,8 +29,14 @@ async def main():
 
     scheduler = Scheduler(vms)
     
-    # Add the initial job
-    await scheduler.add_job(script_path, timeout)
+    # Add the initial jobs
+    for job_data in jobs_data:
+        script_path = job_data.get("script_path")
+        timeout = job_data.get("timeout")
+        if script_path and timeout:
+            await scheduler.add_job(script_path, timeout)
+        else:
+            print(f"Warning: Skipping invalid job entry: {job_data}")
 
     # Start polling and scheduling tasks
     polling_tasks = [asyncio.create_task(vm.poll_utilization()) for vm in vms]
