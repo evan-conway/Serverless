@@ -5,8 +5,7 @@ import time
 import argparse
 import json
 from gcloud_utils import login_and_discover_vms
-from gpu_vm import GPUVirtualMachine
-from scheduler import Scheduler, Job
+from scheduler import Scheduler
 
 async def main():
     parser = argparse.ArgumentParser(description="Run and monitor GPU VM tasks from a JSON configuration file.")
